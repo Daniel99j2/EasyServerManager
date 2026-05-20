@@ -14,5 +14,5 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
 
     implementation "com.google.code.gson:gson:2.13.2"
-    implementation "com.daniel99j:djutil:1.1"
+    implementation "com.daniel99j:djutil:1.6.6"
 }

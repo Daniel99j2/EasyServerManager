@@ -41,27 +41,18 @@
 <div style="display: flex; align-items: center; gap: 10px;">
 <p>Status </p><div class="circle" style="width: 10px; height: 10px; background-color: red; border-radius: 50%;"></div>
 </div>
-<div style="display: grid; width: 100%; height: calc((100vh*0.8) - 100px)">
-<div style="grid-column: 1">
-<div class="square" style="height: 50%;
-margin: 10px;
-  width: 50px;
-  background-color: #555;
-"></div>
-<div class="square2" style="height: 50%;
-  width: calc(100% - 20px);
-  margin: 10px;
-  background-color: #555;
-"></div>
-</div>
-<div class="square3" style="height: 50%;
-  width: 50px;
-  background-color: #555;
-  margin: 10px;
-  grid-column: 2
-">
-    <h2>Log</h2>
-</div>
+<div class="dashboard-grid">
+    <div class="dashboard-column">
+        <div class="dashboard-box"></div>
+        <div class="dashboard-box">
+            <h2 class="dashboard-header">Options</h2>
+        </div>
+    </div>
+    <div class="dashboard-column">
+        <div class="dashboard-box">
+            <h2 class="dashboard-header">Log</h2>
+        </div>
+    </div>
 </div>
 
 <usericon></usericon>

@@ -7,7 +7,7 @@ async function login() {
         } else if (request.status === 401) {
             params = new URLSearchParams()
             params.set("redirect", window.location.href);
-            window.location.replace("http://localhost:8081/login?" + params.toString());
+            window.location.replace("http://localhost:8082/login?" + params.toString());
         } else {
             alert("Something went wrong whilst logging in");
         }

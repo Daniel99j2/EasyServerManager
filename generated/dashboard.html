@@ -35,21 +35,35 @@
         checkStatus();
     });
 </script>
-<script src="http://localhost:8081/password.js"></script>
+<script src="http://localhost:8082/password.js"></script>
 <script type="text/javascript">
     function openHomePage() {
-        window.location.href = "http://localhost:8081/"
+        window.location.href = "http://localhost:8082/"
     }
 </script>
 <p style="color: orangered; cursor: pointer;" onclick='openHomePage()'>NOM NOM IN MAH TOM TOM</p>
 
 <h1>Your Account</h1>
-<p title="This is the hover text!" id="_name"></p>
-<p id="_balance"></p>
-<p id="_discordId"></p>
+<div style="display: flex; align-items: center; gap: 10px;">
+<p>Status </p><div class="circle" style="width: 10px; height: 10px; background-color: red; border-radius: 50%;"></div>
+</div>
+<div class="dashboard-grid">
+    <div class="dashboard-column">
+        <div class="dashboard-box"></div>
+        <div class="dashboard-box">
+            <h2 class="dashboard-header">Options</h2>
+        </div>
+    </div>
+    <div class="dashboard-column">
+        <div class="dashboard-box">
+            <h2 class="dashboard-header">Log</h2>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
     function openProfile() {
-        window.location.href = "http://localhost:8081/account"
+        window.location.href = "http://localhost:8082/account"
     }
 </script>
 <div style="display: block; position:fixed; top:10px; right:20px;">

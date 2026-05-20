@@ -292,3 +292,28 @@ select::placeholder {
     transform: translateY(-50%);
     pointer-events: none;
 }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    height: calc(80vh - 100px);
+}
+
+.dashboard-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dashboard-box {
+    background-color: #18181b;
+    flex: 1;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.dashboard-header {
+    margin: 0;
+}

@@ -1,5 +1,6 @@
 package com.daniel99j.servermanager.site;
 
+import com.daniel99j.servermanager.Main;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -53,7 +54,7 @@ public class SiteGenerator {
             if(fixup) {
                 String stringPage = new String(page);
                 while (true) {
-                    stringPage = stringPage.replace("%base%/", "http://localhost:8081/").replace("%base%", "http://localhost:8081/");
+                    stringPage = stringPage.replace("%base%/", "http://localhost:"+Main.PORT+"/").replace("%base%", "http://localhost:"+Main.PORT+"/");
                     String old = stringPage;
                     for (ElementParser elementParser : ElementParser.elementParsers) {
                         stringPage = elementParser.parseFile(stringPage);

@@ -7,7 +7,7 @@
     <link rel="icon" type="image/x-icon" href="icon.png">
 </head>
 <body>
-<script src="http://localhost:8081/password.js"></script>
+<script src="http://localhost:8082/password.js"></script>
 <script type="text/javascript">
     done = false;
     intervalId = null;
@@ -45,7 +45,7 @@
                 if(!json.deliverer) {
                     clearInterval(intervalId);
                     document.getElementById("startDelivery").disabled = true;
-                    fetch('http://localhost:8081/no_permission')
+                    fetch('http://localhost:8082/no_permission')
                         .then(response => response.text())
                         .then(data => {
                             let newDoc = new DOMParser().parseFromString(data, 'text/html');
@@ -165,7 +165,7 @@
 </script>
 <script type="text/javascript">
     function openHomePage() {
-        window.location.href = "http://localhost:8081/"
+        window.location.href = "http://localhost:8082/"
     }
 </script>
 <p style="color: orangered; cursor: pointer;" onclick='openHomePage()'>NOM NOM IN MAH TOM TOM</p>
@@ -201,7 +201,7 @@
 
 <script type="text/javascript">
     function openProfile() {
-        window.location.href = "http://localhost:8081/account"
+        window.location.href = "http://localhost:8082/account"
     }
 </script>
 <div style="display: block; position:fixed; top:10px; right:20px;">
