@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<script src="%base%/password.js"></script>
+<script type="text/javascript">
+    async function login(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        data = {username: username, password: btoa(password)};
+
+        const request = new XMLHttpRequest();
+            request.open("PUT", "api/login");
+            request.onload = async function () {
+                if(request.status === 200) {
+                    window.location.replace(new URLSearchParams(window.location.search).get("redirect"));
+                } else if(request.status === 401) {
+                    document.getElementById("error").textContent = "Invalid Credentials";
+                } else {
+                    document.getElementById("error").textContent = "Something went wrong";
+                }
+            }
+            request.send(JSON.stringify(data));
+    }
+</script>
+
+<body>
+<h1>Please login</h1>
+<form onSubmit="login(event)">
+    <input type="text" name="username" id="username" placeholder="Username" autocomplete="username">
+    <input type="password" name="password" id="password" placeholder="Password" autocomplete="password">
+    <input type="submit" value="Login">
+</form>
+<p id="error" style="color: red"></p>
+</body>
+</html>
