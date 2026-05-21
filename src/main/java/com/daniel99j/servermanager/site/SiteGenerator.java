@@ -18,7 +18,7 @@ public class SiteGenerator {
 
     public static void load(HttpServer server) {
         try {
-            Files.list(Paths.get("pages").toAbsolutePath()).forEach((p) -> {
+            Files.list(Paths.get("/var/home/dj/Coding/EasyServerManager/pages").toAbsolutePath()).forEach((p) -> {
                 try {
                     if(!p.getFileName().toString().endsWith(".png")) {
                         GeneratedHandler handler = new GeneratedHandler(Files.readString(p));

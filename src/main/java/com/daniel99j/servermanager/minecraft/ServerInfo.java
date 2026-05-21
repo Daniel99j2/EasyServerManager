@@ -2,6 +2,8 @@ package com.daniel99j.servermanager.minecraft;
 
 import com.daniel99j.djutil.MiscUtils;
 import com.daniel99j.servermanager.CommandUtil;
+import com.daniel99j.servermanager.Config;
+import com.daniel99j.servermanager.Main;
 import com.daniel99j.servermanager.WebhookSender;
 
 import java.nio.file.Files;
@@ -12,15 +14,17 @@ import java.util.List;
 public class ServerInfo {
     public static ServerStatus currentStatus = ServerStatus.OFFLINE;
     private static int processId = -1;
+    public static LogManager logManager;
 
     public static void start() {
 
     }
 
     public static void refreshStatus() {
-        boolean serverActuallyRunning = CommandUtil.pingMinecraftWait("e", 1);
+        boolean serverActuallyRunning = CommandUtil.pingMinecraft(Config.INSTANCE.getServerIp(), Config.INSTANCE.getServerPort());
+
         //first if thinking running then check process id
-        if(currentStatus.shouldBeRunning()) {
+        if(currentStatus.shouldBeRunning() && !serverActuallyRunning) {
             if(CommandUtil.execute("pwdx "+processId).contains("/var/home/dj/.gradle")) return;
             //the process is not valid! find cause.
 
@@ -81,6 +85,16 @@ public class ServerInfo {
             processId = -1;
             currentStatus = ServerStatus.OFFLINE;
             WebhookSender.sendMessage("Your server has stopped unexpectedly, and we were not able to find out why!\nThe server will NOT be started automatically!");
+        } else if(serverActuallyRunning && !currentStatus.shouldBeRunning()) {
+            currentStatus = ServerStatus.RUNNING;
+            Main.sse.sendToAll("clear_logs", "");
+        }
+
+        if(currentStatus.shouldBeRunning() && logManager == null) {
+            ServerInfo.logManager = new LogManager("logs/latest.log", false, Main.logsSSE::sendToAll);
+        } else if(!currentStatus.shouldBeRunning() && logManager != null) {
+            logManager.close();
+            Main.logsSSE.dataToSend.clear();
         }
     }
 

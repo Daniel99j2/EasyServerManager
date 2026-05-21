@@ -10,9 +10,9 @@ public class ItemsElement extends ElementParser {
     @Override
     public String parse(String data) {
         AtomicReference<String> additions = new AtomicReference<>("<div class=\"cart\" id=\"Cart\">");
-        Items.items.forEach((name, item) -> {
-            additions.set(additions + "<item>" + name + "</item>");
-        });
+//        Items.items.forEach((name, item) -> {
+//            additions.set(additions + "<item>" + name + "</item>");
+//        });
         return additions.get()+"</div>";
     }
 }

@@ -7,9 +7,10 @@ import java.io.OutputStream;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SSERequestHandler implements HttpHandler {
-    private final List<OutputStream> outputs = new ArrayList<>();
+    protected final List<OutputStream> outputs = new ArrayList<>();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -22,20 +23,35 @@ public class SSERequestHandler implements HttpHandler {
         outputs.add(exchange.getResponseBody());
 
         String response = """
-                data: hello \n\n""";
-        this.sendEventStream(response, exchange.getResponseBody());
+                event: init
+                data: hello world \n\n""";
+        this.sendEventStream(response, exchange.getResponseBody(), true);
     }
 
-    public synchronized void sendEventStream(String message, OutputStream sseOutputStream) throws IOException {
+    public synchronized void sendEventStream(String message, OutputStream sseOutputStream, boolean flush) throws IOException {
         sseOutputStream.write(message.getBytes());
-        sseOutputStream.flush();
+        if(flush) sseOutputStream.flush();
     }
 
     public void sendToAll(String id, String data) {
         List<OutputStream> toRemove = new ArrayList<>();
         this.outputs.forEach(os-> {
             try {
-                this.sendEventStream("event: "+id+"\ndata: "+data.replace("\\", "\\\\")+"\n\n", os);
+                this.sendEventStream("event: "+id+"\ndata: "+data.replace("\n", "\\n")+"\n\n", os, true);
+            } catch (IOException e) {
+                toRemove.add(os);
+                if(!e.getMessage().equals("Broken pipe")) System.out.println("Disconnected with reason:"+e.getMessage());
+            }
+        });
+        this.outputs.removeAll(toRemove);
+    }
+
+    public void loopConnected(Consumer<OutputStream> runnable) {
+        List<OutputStream> toRemove = new ArrayList<>();
+        this.outputs.forEach(os-> {
+            try {
+                this.sendEventStream("event: heartbeat\ndata: ping\n\n", os, true);
+                runnable.accept(os);
             } catch (IOException e) {
                 toRemove.add(os);
                 if(!e.getMessage().equals("Broken pipe")) System.out.println("Disconnected with reason:"+e.getMessage());

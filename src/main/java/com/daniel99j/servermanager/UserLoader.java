@@ -24,7 +24,7 @@ public class UserLoader {
     public static boolean login(String password) {
         failedAttempts.removeIf(instant -> instant.isBefore(Instant.now().minusSeconds(60)));
         if(failedAttempts.size() > 5) return false;
-        boolean worked = hashPassword(password).equals(Config.INSTANCE.loginKey);
+        boolean worked = password.equals(Config.INSTANCE.getLoginKey());
         if(!worked) failedAttempts.add(Instant.now());
         return worked;
     }
@@ -33,6 +33,10 @@ public class UserLoader {
         if (login(exchange)) {
             return true;
         } else {
+            if(failedAttempts.size() > 5) {
+                SiteUtil.respond(exchange, "Too many attempts", 429);
+                return false;
+            }
             SiteUtil.respond(exchange, "Not Authorised", 401);
             return false;
         }
@@ -55,7 +59,7 @@ public class UserLoader {
             }
 
             //The HASHED: tells me that the config is for a token not password
-            return "HASHED: "+hexString.toString();
+            return hexString.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -72,5 +76,9 @@ public class UserLoader {
             }
         }
         return "";
+    }
+
+    public static int getFailedAttempts() {
+        return failedAttempts.size();
     }
 }

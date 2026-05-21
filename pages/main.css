@@ -245,10 +245,6 @@ input::placeholder {
     color: var(--text-muted);
 }
 
-*::-webkit-scrollbar {
-    display: none;
-}
-
 .verificationcode {
     width: 50px;
     text-align: center;
@@ -299,6 +295,7 @@ select::placeholder {
     gap: 10px;
     width: 100%;
     height: calc(80vh - 100px);
+    max-width: fit-content;
 }
 
 .dashboard-column {
@@ -315,5 +312,9 @@ select::placeholder {
 }
 
 .dashboard-header {
+    margin: 0;
+}
+
+.log-box p {
     margin: 0;
 }

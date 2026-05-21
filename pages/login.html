@@ -9,11 +9,7 @@
 <script type="text/javascript">
     async function login(event) {
         event.preventDefault();
-
-        const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
-
-        data = {username: username, password: btoa(password)};
 
         const request = new XMLHttpRequest();
             request.open("PUT", "api/login");
@@ -22,11 +18,13 @@
                     window.location.replace(new URLSearchParams(window.location.search).get("redirect"));
                 } else if(request.status === 401) {
                     document.getElementById("error").textContent = "Invalid Credentials";
+                } else if(request.status === 429) {
+                    document.getElementById("error").textContent = "Please try again in 1m";
                 } else {
                     document.getElementById("error").textContent = "Something went wrong";
                 }
             }
-            request.send(JSON.stringify(data));
+            request.send(btoa(password));
     }
 </script>
 

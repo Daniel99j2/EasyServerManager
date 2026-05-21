@@ -13,7 +13,7 @@ public class SiteTitleElement extends ElementParser {
                         window.location.href = "%base%"
                     }
                 </script>
-                <p style="color: orangered; cursor: pointer;" onclick='openHomePage()'>NOM NOM IN MAH TOM TOM</p>
+                <p style="color: lime; cursor: pointer;" onclick='openHomePage()'>BEEP BOOP ON MAH SERVER</p>
                 """;
     }
 }

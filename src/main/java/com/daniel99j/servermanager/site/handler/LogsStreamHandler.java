@@ -1,5 +1,7 @@
 package com.daniel99j.servermanager.site.handler;
 
+import com.daniel99j.servermanager.UserLoader;
+import com.daniel99j.servermanager.minecraft.ServerInfo;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
@@ -8,40 +10,38 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LogsStreamHandler implements HttpHandler {
-    private final List<OutputStream> outputs = new ArrayList<>();
+public class LogsStreamHandler extends SSERequestHandler {
+    public final List<String> dataToSend = new ArrayList<>();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        if(!UserLoader.checkLoggedIn(exchange)) return;
+
         System.out.println(exchange.getRequestURI());
         exchange.getResponseHeaders().add("Content-Type", "text/event-stream");
         exchange.getResponseHeaders().add("charset", "utf-8");
         exchange.getResponseHeaders().add("Connection", "keep-alive");
-        exchange.getResponseHeaders().add("access-control-allow-origin", "*");
         exchange.sendResponseHeaders(200, 0);
         outputs.add(exchange.getResponseBody());
 
-        String response = """
-                event: init
-                data: logs \n\n""";
-        this.sendEventStream(response, exchange.getResponseBody());
-    }
-
-    public synchronized void sendEventStream(String message, OutputStream sseOutputStream) throws IOException {
-        sseOutputStream.write(message.getBytes());
-        sseOutputStream.flush();
-    }
-
-    public void sendToAll(String id, String data) {
-        List<OutputStream> toRemove = new ArrayList<>();
-        this.outputs.forEach(os-> {
-            try {
-                this.sendEventStream("event: "+id+"\ndata: "+data.replace("\\", "\\\\")+"\n\n", os);
-            } catch (IOException e) {
-                toRemove.add(os);
-                if(!e.getMessage().equals("Broken pipe")) System.out.println("Disconnected with reason:"+e.getMessage());
+        if(!ServerInfo.currentStatus.shouldBeRunning()) {
+            this.send("Server not running", exchange.getResponseBody(), true);
+        } else {
+            this.send("==== LOGS START ====\n", exchange.getResponseBody(), false);
+            for (String s : dataToSend) {
+                send(s, exchange.getResponseBody(), false);
             }
-        });
-        this.outputs.removeAll(toRemove);
+
+            exchange.getResponseBody().flush();
+        }
+    }
+
+    private void send(String data, OutputStream os, boolean flush) throws IOException {
+        sendEventStream("event: message\ndata: "+data.replace("\n", "\\n")+"\n\n", os, flush);
+    }
+
+    public void sendToAll(String data) {
+        sendToAll("message", data);
+        dataToSend.add(data);
     }
 }

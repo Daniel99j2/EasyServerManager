@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 public class CommandUtil {
     public static String execute(String command) {
@@ -27,8 +28,7 @@ public class CommandUtil {
     public static boolean pingMinecraft(String host, int port) {
         try (Socket socket = new Socket()) {
             //small timeout as the server is on the same computer so it SHOULD be only ~1ms
-            //TODO: Configuable
-            socket.connect(new InetSocketAddress(host, port), 10);
+            socket.connect(new InetSocketAddress(host, port), 1000);
             return true;
         } catch (Exception e) {
             return false;

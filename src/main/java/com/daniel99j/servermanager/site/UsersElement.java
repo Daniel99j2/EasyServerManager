@@ -15,13 +15,13 @@ public class UsersElement extends ElementParser {
                     <option value="null" disabled selected>--Select a delivery option--</option>
                 """);
 
-        for (User user : UserLoader.userList.users) {
-            out.append("<option value=\"");
-            out.append(user.name);
-            out.append("\">");
-            out.append(user.name);
-            out.append("</option>\n");
-        }
+//        for (User user : UserLoader.userList.users) {
+//            out.append("<option value=\"");
+//            out.append(user.name);
+//            out.append("\">");
+//            out.append(user.name);
+//            out.append("</option>\n");
+//        }
 
         out.append("</select>");
 
