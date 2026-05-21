@@ -1,55 +1,46 @@
 package com.daniel99j.servermanager;
 
+import com.daniel99j.servermanager.site.SiteUtil;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserLoader {
-    public static UserList userList = new UserList();
+    private static final List<Instant> failedAttempts = new ArrayList<>();
 
-    public static User getUser(String name) {
-        return userList.users.stream().filter(user -> user.name.equals(name)).findFirst().orElse(null);
+    public static boolean login(HttpExchange exchange) {
+        return login(getCookieValue(exchange.getRequestHeaders().getFirst("Cookie"), "Token"));
     }
 
-    public static User loginOrNull(HttpExchange exchange) {
-        try {
-            return login(exchange);
-        } catch (Exception e) {
-            return null;
+    public static boolean login(String password) {
+        failedAttempts.removeIf(instant -> instant.isBefore(Instant.now().minusSeconds(60)));
+        if(failedAttempts.size() > 5) return false;
+        boolean worked = hashPassword(password).equals(Config.INSTANCE.loginKey);
+        if(!worked) failedAttempts.add(Instant.now());
+        return worked;
+    }
+
+    public static boolean checkLoggedIn(HttpExchange exchange) {
+        if (login(exchange)) {
+            return true;
+        } else {
+            SiteUtil.respond(exchange, "Not Authorised", 401);
+            return false;
         }
     }
 
-    public static User login(HttpExchange exchange) throws IllegalAccessException {
-        return loginToken(getCookieValue(exchange.getRequestHeaders().getFirst("Cookie"), "Username"), getCookieValue(exchange.getRequestHeaders().getFirst("Cookie"), "Token"));
-    }
-
-    public static User loginToken(String username, String token) throws IllegalAccessException {
-        User user = getUser(username);
-        if(user == null) throw new IllegalAccessException("User not found");
-        if(!user.hasPasswordSetup()) {
-            System.out.println("User " + user.name + " has no password setup. Use set-password {user} {password}");
-        };
-        if(!user.checkPassword(token)) throw new IllegalAccessException("Wrong password");
-        return user;
-    }
-
-    public static User login(String username, String password) throws IllegalAccessException {
-        User user = getUser(username);
-        if(user == null) throw new IllegalAccessException("User not found");
-        if(!user.hasPasswordSetup()) {
-            System.out.println("User " + user.name + " has no password setup. Use set-password {user} {password}");
-        };
-        if(!user.checkPassword(hashPassword(username, password))) throw new IllegalAccessException("Wrong password");
-        return user;
-    }
-
-    public static String hashPassword(String extra, String password) {
-        String combined = extra + password;
+    //no extra to use here as theres only 1 user!
+    public static String hashPassword(String password) {
+        String combined = password;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(combined.getBytes(StandardCharsets.UTF_8));
@@ -63,14 +54,15 @@ public class UserLoader {
                 hexString.append(hex);
             }
 
-            return hexString.toString();
+            //The HASHED: tells me that the config is for a token not password
+            return "HASHED: "+hexString.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String getCookieValue(String cookieHeader, String key) throws IllegalAccessException {
-        if (cookieHeader == null) throw new IllegalAccessException("Cookie header not found");
+    public static String getCookieValue(String cookieHeader, String key) {
+        if (cookieHeader == null) return "";
 
         String[] cookies = cookieHeader.split(";");
         for (String cookie : cookies) {
@@ -79,27 +71,6 @@ public class UserLoader {
                 return pair[1].replace("\"", "");
             }
         }
-        throw new IllegalAccessException("Cookie not found");
-    }
-
-    public static void load() {
-        try {
-            Path path = Paths.get("users.json");
-            String data = Files.readString(path);
-            userList = new GsonBuilder().create().fromJson(data, UserList.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void save() {
-        try {
-            Path path = Paths.get("users.json");
-            Files.deleteIfExists(path);
-            Files.createFile(path);
-            Files.write(path, new GsonBuilder().serializeNulls().setPrettyPrinting().create().toJson(userList).getBytes());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return "";
     }
 }

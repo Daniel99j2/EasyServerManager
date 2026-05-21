@@ -4,11 +4,10 @@ import java.util.ArrayList;
 
 public class ElementParser {
     public final String elementName;
-    public static final ArrayList<ElementParser> elementParsers = new ArrayList<ElementParser>();
+    public static final ArrayList<ElementParser> PARSERS = new ArrayList<ElementParser>();
 
     public ElementParser(String elementName) {
         this.elementName = elementName;
-        elementParsers.add(this);
     }
 
     public String parseFile(String file) {

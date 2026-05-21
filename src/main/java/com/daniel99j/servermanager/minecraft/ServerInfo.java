@@ -18,6 +18,7 @@ public class ServerInfo {
     }
 
     public static void refreshStatus() {
+        boolean serverActuallyRunning = CommandUtil.pingMinecraftWait("e", 1);
         //first if thinking running then check process id
         if(currentStatus.shouldBeRunning()) {
             if(CommandUtil.execute("pwdx "+processId).contains("/var/home/dj/.gradle")) return;

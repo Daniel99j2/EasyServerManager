@@ -1,8 +1,5 @@
 package com.daniel99j.servermanager.site;
 
-import com.daniel99j.servermanager.Item;
-import com.daniel99j.servermanager.Items;
-
 public class ItemElement extends ElementParser {
     public ItemElement() {
         super("item");

@@ -35,4 +35,7 @@ public class CommandUtil {
         }
     }
 
+    public static void pingMinecraftInBackground(String host, int port, Consumer<Boolean> handler) {
+
+    }
 }

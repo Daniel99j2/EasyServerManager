@@ -1,6 +1,5 @@
 package com.daniel99j.servermanager.site;
 
-import com.daniel99j.servermanager.User;
 import com.daniel99j.servermanager.UserLoader;
 
 public class UsersElement extends ElementParser {

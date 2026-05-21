@@ -1,7 +1,5 @@
 package com.daniel99j.servermanager.site;
 
-import com.daniel99j.servermanager.Items;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ItemsElement extends ElementParser {

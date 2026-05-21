@@ -21,12 +21,12 @@ public class Main {
 
         UserLoader.load();
 
-        new ItemsElement();
-        new ItemElement();
-        new CartDataElement();
-        new UserIconElement();
-        new SiteTitleElement();
-        new UsersElement();
+        ElementParser.PARSERS.add(new ItemsElement());
+        ElementParser.PARSERS.add(new ItemElement());
+        ElementParser.PARSERS.add(new CartDataElement());
+        ElementParser.PARSERS.add(new UserIconElement());
+        ElementParser.PARSERS.add(new SiteTitleElement());
+        ElementParser.PARSERS.add(new UsersElement());
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         SiteGenerator.load(server);
 

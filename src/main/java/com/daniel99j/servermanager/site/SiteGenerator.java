@@ -56,7 +56,7 @@ public class SiteGenerator {
                 while (true) {
                     stringPage = stringPage.replace("%base%/", "http://localhost:"+Main.PORT+"/").replace("%base%", "http://localhost:"+Main.PORT+"/");
                     String old = stringPage;
-                    for (ElementParser elementParser : ElementParser.elementParsers) {
+                    for (ElementParser elementParser : ElementParser.PARSERS) {
                         stringPage = elementParser.parseFile(stringPage);
                     }
                     if (stringPage.equals(old)) break;

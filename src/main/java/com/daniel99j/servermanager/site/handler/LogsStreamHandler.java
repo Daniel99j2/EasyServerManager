@@ -1,4 +1,4 @@
-package com.daniel99j.servermanager;
+package com.daniel99j.servermanager.site.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -8,8 +8,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SSERequestHandler implements HttpHandler {
-    private final List<OutputStream> sseOutputStreamList = new ArrayList<>();
+public class LogsStreamHandler implements HttpHandler {
+    private final List<OutputStream> outputs = new ArrayList<>();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -19,10 +19,11 @@ public class SSERequestHandler implements HttpHandler {
         exchange.getResponseHeaders().add("Connection", "keep-alive");
         exchange.getResponseHeaders().add("access-control-allow-origin", "*");
         exchange.sendResponseHeaders(200, 0);
-        sseOutputStreamList.add(exchange.getResponseBody());
+        outputs.add(exchange.getResponseBody());
 
         String response = """
-                data: hello \n\n""";
+                event: init
+                data: logs \n\n""";
         this.sendEventStream(response, exchange.getResponseBody());
     }
 
@@ -33,14 +34,14 @@ public class SSERequestHandler implements HttpHandler {
 
     public void sendToAll(String id, String data) {
         List<OutputStream> toRemove = new ArrayList<>();
-        this.sseOutputStreamList.forEach(os-> {
+        this.outputs.forEach(os-> {
             try {
                 this.sendEventStream("event: "+id+"\ndata: "+data.replace("\\", "\\\\")+"\n\n", os);
             } catch (IOException e) {
-                if(!e.getMessage().equals("Broken pipe")) throw new RuntimeException(e);
-                else toRemove.add(os);
+                toRemove.add(os);
+                if(!e.getMessage().equals("Broken pipe")) System.out.println("Disconnected with reason:"+e.getMessage());
             }
         });
-        this.sseOutputStreamList.removeAll(toRemove);
+        this.outputs.removeAll(toRemove);
     }
 }
