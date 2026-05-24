@@ -1,5 +1,8 @@
 package com.daniel99j.servermanager.site.handler;
 
+import com.daniel99j.servermanager.Main;
+import com.daniel99j.servermanager.UserLoader;
+import com.daniel99j.servermanager.minecraft.ServerInfo;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
@@ -14,7 +17,8 @@ public class SSERequestHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println(exchange.getRequestURI());
+        if(!UserLoader.checkLoggedIn(exchange)) return;
+
         exchange.getResponseHeaders().add("Content-Type", "text/event-stream");
         exchange.getResponseHeaders().add("charset", "utf-8");
         exchange.getResponseHeaders().add("Connection", "keep-alive");
@@ -26,6 +30,8 @@ public class SSERequestHandler implements HttpHandler {
                 event: init
                 data: hello world \n\n""";
         this.sendEventStream(response, exchange.getResponseBody(), true);
+
+        ServerInfo.resend(exchange.getResponseBody());
     }
 
     public synchronized void sendEventStream(String message, OutputStream sseOutputStream, boolean flush) throws IOException {

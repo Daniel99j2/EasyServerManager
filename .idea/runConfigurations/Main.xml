@@ -4,7 +4,8 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.daniel99j.servermanager.Main" />
     <module name="EasyServerManager.main" />
-    <option name="WORKING_DIRECTORY" value="$USER_HOME$/.local/share/PandoraLauncher/instances/Latest Snapshot/.minecraft" />
+    <option name="PROGRAM_PARAMETERS" value="-genpages -local" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run/server" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

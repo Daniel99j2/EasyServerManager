@@ -1,5 +1,6 @@
 package com.daniel99j.servermanager.site;
 
+import com.daniel99j.servermanager.Config;
 import com.daniel99j.servermanager.Main;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -7,39 +8,57 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URI;
+import java.nio.file.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class SiteGenerator {
-    public static Map<String, String> customPages = new HashMap<>();
-
     public static void load(HttpServer server) {
         try {
-            Files.list(Paths.get("/var/home/dj/Coding/EasyServerManager/pages").toAbsolutePath()).forEach((p) -> {
-                try {
-                    if(!p.getFileName().toString().endsWith(".png")) {
-                        GeneratedHandler handler = new GeneratedHandler(Files.readString(p));
-                        if(!p.getFileName().toString().equals("deliver.html") && !p.getFileName().toString().equals("not_found.html")) server.createContext("/"+p.getFileName().toString().replace(".html", ""), handler);
-                        else customPages.put(p.getFileName().toString(), new String(handler.page));
+            URI uri = Objects.requireNonNull(SiteGenerator.class.getResource("/pages")).toURI();
+            if (uri.getScheme().equals("jar")) {
+                try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+                    loadPages(server, fs.getPath("/pages"));
+                }
+            } else {
+                loadPages(server, Paths.get(uri));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-                        Path path = Path.of("generated/" + p.getFileName());
-                        Files.createDirectories(path.getParent());
-                        Files.deleteIfExists(path);
-                        Files.createFile(path);
-                        Files.write(path, handler.page);
+    private static void loadPages(HttpServer server, Path pagesPath) throws IOException {
+        try (Stream<Path> paths = Files.list(pagesPath)) {
+            paths.forEach(p -> {
+                try {
+                    String fileName = p.getFileName().toString();
+                    if (!fileName.endsWith(".png")) {
+                        GeneratedHandler handler = new GeneratedHandler(Files.readString(p));
+                        server.createContext("/" + fileName.replace(".html", ""), handler);
+
+                        if (Main.showGeneratedPages) {
+                            Path output = Paths.get("generated", fileName);
+                            Files.createDirectories(output.getParent());
+                            Files.write(
+                                    output,
+                                    handler.page,
+                                    StandardOpenOption.CREATE,
+                                    StandardOpenOption.TRUNCATE_EXISTING
+                            );
+                        }
                     } else {
                         GeneratedHandler handler = new GeneratedHandler(Files.readAllBytes(p), false);
-                        server.createContext("/"+p.getFileName().toString(), handler);
+                        server.createContext("/" + fileName, handler);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -54,7 +73,7 @@ public class SiteGenerator {
             if(fixup) {
                 String stringPage = new String(page);
                 while (true) {
-                    stringPage = stringPage.replace("%base%/", "http://localhost:"+Main.PORT+"/").replace("%base%", "http://localhost:"+Main.PORT+"/");
+                    stringPage = stringPage.replace("%base%/", "http://"+Main.baseSite+":"+ Config.INSTANCE.managerPort+"/").replace("%base%", "http://localhost:"+Config.INSTANCE.managerPort+"/");
                     String old = stringPage;
                     for (ElementParser elementParser : ElementParser.PARSERS) {
                         stringPage = elementParser.parseFile(stringPage);
@@ -82,7 +101,7 @@ public class SiteGenerator {
         return """
                 <html>
                 <body>
-                <script src="http://localhost:8080/password.js"></script>
+                <script src="http://baseSite:port/password.js"></script>
                 <script type="text/javascript">
                     window.addEventListener("load", () => {
                        login();
@@ -90,11 +109,7 @@ public class SiteGenerator {
                 </script>
                 </body>
                 </html>
-                """;
-    }
-
-    public static String not_found() {
-        return customPages.get("not_found.html");
+                """.replace("baseSite", Main.baseSite).replace("port", String.valueOf(Config.INSTANCE.getServerPort()));
     }
 
     public static String redirect(String url) {

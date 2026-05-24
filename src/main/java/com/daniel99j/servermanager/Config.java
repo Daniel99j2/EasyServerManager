@@ -1,6 +1,7 @@
 package com.daniel99j.servermanager;
 
 import com.daniel99j.djutil.MiscUtils;
+import com.daniel99j.servermanager.minecraft.ServerStatus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
@@ -13,9 +14,16 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class Config {
+    public int managerPort = 8082;
     public String webhookURL = "";
     private String loginKey = "";
-    public String serverIp = "https://example.com:1010";
+    public String serverIp = "";
+    public String startCommand = "";
+    public boolean startAfterGameCrash = true;
+    public boolean startAfterHostCrash = true;
+    @SuppressWarnings({"unused", "FieldMayBeFinal"})
+    private String doNotChangeBelow = "Do not change values below";
+    public String previousState = ServerStatus.OFFLINE.name();
     private static boolean tempSkipPasswordCheck = false;
 
     private static final Gson GSON_PRETTY = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
@@ -41,6 +49,7 @@ public class Config {
 
     public static void load() {
         INSTANCE = loadNoReplace();
+        INSTANCE.save();
     }
 
     public static Config loadNoReplace() {
@@ -64,11 +73,13 @@ public class Config {
     }
 
     public String getServerIp() {
-        return MiscUtils.replaceTextBetween(serverIp, ":", "", "");
+        int i = serverIp.lastIndexOf(":");
+        return serverIp.substring(0, i);
     }
 
     public int getServerPort() {
-        return serverIp.contains(":") ? Integer.parseInt(MiscUtils.replaceTextBetween(serverIp, "", ":", "")) : 25565;
+        int i = serverIp.lastIndexOf(":");
+        return Integer.parseInt(serverIp.substring(i+1));
     }
 
     public String getLoginKey() {

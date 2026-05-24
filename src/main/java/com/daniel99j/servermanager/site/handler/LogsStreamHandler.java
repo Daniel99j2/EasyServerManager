@@ -1,6 +1,7 @@
 package com.daniel99j.servermanager.site.handler;
 
 import com.daniel99j.servermanager.UserLoader;
+import com.daniel99j.servermanager.minecraft.LogLineInfo;
 import com.daniel99j.servermanager.minecraft.ServerInfo;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -44,4 +45,22 @@ public class LogsStreamHandler extends SSERequestHandler {
         sendToAll("message", data);
         dataToSend.add(data);
     }
+
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes")
+    public void sendToAll(LogLineInfo data) {
+        String line = data.log;
+        if (data.type.equals(LogLineInfo.Type.INFO)) line = "$0" + line;
+        else if (data.type.equals(LogLineInfo.Type.COMPLETE_SAVE)) line = "$0" + line;
+        else if (data.type.equals(LogLineInfo.Type.COMPLETE_LOAD)) line = "$0" + line;
+        else if (data.type.equals(LogLineInfo.Type.WARN)) line = "$1" + line;
+        else if (data.type.equals(LogLineInfo.Type.ERROR)) line = "$2" + line;
+        else if (data.type.equals(LogLineInfo.Type.FATAL)) line = "$3" + line;
+        else if (data.type.equals(LogLineInfo.Type.CRASH)) line = "$3" + line;
+        else if (data.type.equals(LogLineInfo.Type.COMMAND)) line = "$5" + line;
+        else if (data.type.equals(LogLineInfo.Type.STOP)) line = "$2" + line;
+        else if (data.type.equals(LogLineInfo.Type.JOIN) || data.type.equals(LogLineInfo.Type.LEAVE)) line = "$4" + line;
+        sendToAll("message", line);
+        dataToSend.add(line);
+    }
+
 }
